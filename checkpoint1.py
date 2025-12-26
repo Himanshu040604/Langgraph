@@ -1,8 +1,10 @@
 import os
+from typing import Annotated, TypedDict, Union
 from dotenv import load_dotenv
-from typing import Annotated, TypedDict
-from langchain_core.messages import BaseMessage
-from langgraph.graph import StateGraph, MessagesState, START, END
+
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -39,3 +41,25 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
 
 # 5. Bind Tools (this helps the LLM to see your tools)
 llm_with_tools = llm.bind_tools(tools_list)
+
+class State(TypedDict):
+    messages: Annotated[list[BaseMessage], add_messages]
+
+def demo_chatbot(state: State):
+    return {'messages': [llm_with_tools.invoke(state['messages'])]}
+
+tool_node=ToolNode(tools_list)
+builder= StateGraph(State)
+builder.add_node("chatbot", demo_chatbot)
+builder.add_node("tools", tool_node)
+builder.add_edge(START, "chatbot")
+
+builder.add_conditional_edges(
+    "chatbot",
+    tools_condition
+)
+
+builder.add_edge("tools", "chatbot")
+
+graph=builder.compile()
+print("Graph Compiled Successfully")
