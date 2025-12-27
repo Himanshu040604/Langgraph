@@ -29,11 +29,10 @@ def worker2(input_data):
     if val < 5:
         print(f"Worker2 updating {val} -> 5")
         return {"counter": 5}
-    return {}
+    return {} # No update
 
 # 3. Building the Graph
-# Remove the .write_to("counter") from the builder because 
-# the workers are now returning the channel name in a dict
+# Remove the .write_to("counter") from the builder because the workers are now returning the channel name in a dict
 node1 = (
     NodeBuilder()
     .subscribe_to("counter")
