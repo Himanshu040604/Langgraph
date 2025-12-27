@@ -31,8 +31,8 @@ node2 = NodeBuilder().subscribe_to("inbox").do(worker2).write_to("counter").buil
 app = Pregel(
     nodes={"w1": node1, "w2": node2},
     channels=channels,
-    input_channels="inbox",        # Start here
-    output_channels=["counter"]    # End here
+    input_channels="inbox",      
+    output_channels=["counter"]   
 )
 
 config = {"recursion_limit": 5}
